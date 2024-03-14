@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Services;
+using WebAPI.DTOs;
+using WebAPI.Extensions;
+using WebAPI.Models;
+using System.Net;
 
 namespace WebAPI.Controllers;
 
@@ -24,19 +28,113 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet("{city}")]
-    public async Task<string> Get(string city)
+    public async Task<ActionResult<WeatherDTO>> Get(string city, string? apiKey = null)
     {
-        Tuple<double, double> coords = await _cityLocationApiService.GetCoordinates(city, "f91e0b219e96453d5578560f28786e37");
-        var weather = await _openWeatherMapApi.GetWeather(coords.Item1, coords.Item2, "f91e0b219e96453d5578560f28786e37");
-        return weather;
+        try
+        {
+            CityLocation location = apiKey != null ?
+                await _cityLocationApiService.GetLocation(city, apiKey) :
+                await _cityLocationApiService.GetLocation(city);
+
+            var weatherJson = apiKey != null ?
+                await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude, apiKey) :
+                await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude);
+
+            WeatherDTO weatherDTO = ConvertJsonToWeatherDTO(weatherJson, location.City);
+            return weatherDTO;
+        }
+        catch (HttpRequestException ex)
+        {
+            switch (ex.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    return NotFound(ex.Message);
+                case HttpStatusCode.Unauthorized:
+                    return Unauthorized(ex.Message);
+                default:
+                    return BadRequest(ex.Message);
+            }
+        }
     }
 
-    [HttpGet("{city}, {apiKey}")]
-    public async Task<string> Get(string city, string apiKey)
+    [HttpGet("{firstCity}/{secondCity}")]
+    public async Task<ActionResult<WeatherDifferenceDTO>> Get(string firstCity, string secondCity, string? apiKey = null)
     {
-        var weather = await _openWeatherMapApi.GetWeather(55.01, 82.55, "f91e0b219e96453d5578560f28786e37");
-        return weather;
+        try
+        {
+            CityLocation firstLocation = apiKey != null ?
+                await _cityLocationApiService.GetLocation(firstCity, apiKey) :
+                await _cityLocationApiService.GetLocation(firstCity);
+
+            CityLocation secondLocation = apiKey != null ?
+                await _cityLocationApiService.GetLocation(secondCity, apiKey) :
+                await _cityLocationApiService.GetLocation(secondCity);
+
+            var firstWeatherJson = apiKey != null ?
+                await _openWeatherMapApi.GetWeather(firstLocation.Latitude, firstLocation.Longitude, apiKey) :
+                await _openWeatherMapApi.GetWeather(firstLocation.Latitude, firstLocation.Longitude);
+
+            var secondWeatherJson = apiKey != null ?
+               await _openWeatherMapApi.GetWeather(secondLocation.Latitude, secondLocation.Longitude, apiKey) :
+               await _openWeatherMapApi.GetWeather(secondLocation.Latitude, secondLocation.Longitude);
+
+            WeatherDTO firstWeatherDTO = ConvertJsonToWeatherDTO(firstWeatherJson, firstLocation.City);
+            WeatherDTO secondWeatherDTO = ConvertJsonToWeatherDTO(secondWeatherJson, secondLocation.City);
+
+            return new WeatherDifferenceDTO(firstWeatherDTO, secondWeatherDTO);
+        }
+        catch (HttpRequestException ex)
+        {
+            switch (ex.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    return NotFound(ex.Message);
+                case HttpStatusCode.Unauthorized:
+                    return Unauthorized(ex.Message);
+                default:
+                    return BadRequest(ex.Message);
+            }
+        }
     }
 
+    [HttpGet("{city}/xml")]
+    [Produces("application/xml")]
+    public async Task<ActionResult<WeatherDTO>> GetXML(string city, string? apiKey = null)
+    {
+        try
+        {
+            CityLocation location = apiKey != null ?
+                await _cityLocationApiService.GetLocation(city, apiKey) :
+                await _cityLocationApiService.GetLocation(city);
+
+            var weatherJson = apiKey != null ?
+                await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude, apiKey) :
+                await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude);
+
+            WeatherDTO weatherDTO = ConvertJsonToWeatherDTO(weatherJson, location.City);
+            return weatherDTO;
+        }
+        catch (HttpRequestException ex)
+        {
+            switch (ex.StatusCode)
+            {
+                case HttpStatusCode.NotFound:
+                    return NotFound(ex.Message);
+                case HttpStatusCode.Unauthorized:
+                    return Unauthorized(ex.Message);
+                default:
+                    return BadRequest(ex.Message);
+            }
+        }
+    }
+
+    private WeatherDTO ConvertJsonToWeatherDTO(string weatherJson, string city)
+    {
+        WeatherDTO weatherDTO = WeatherConverter.JsonToWeatherDTO(weatherJson);
+        weatherDTO.CityName = city;
+        weatherDTO.ServerTime = DateTime.Now;
+        weatherDTO.CityTimeDifference = weatherDTO.CityTime - weatherDTO.ServerTime;
+        return weatherDTO;
+    }
 }
 

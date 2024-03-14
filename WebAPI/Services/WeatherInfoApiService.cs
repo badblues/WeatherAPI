@@ -2,19 +2,34 @@
 
 public class WeatherInfoApiService
 {
-    private string apiURL = "https://api.openweathermap.org/data/3.0/onecall";
+    private readonly string apiURL = "https://api.openweathermap.org/data/3.0/onecall";
 
-    private HttpClient _httpClient;
+    private readonly HttpClient _httpClient;
 
-    public WeatherInfoApiService()
+    private readonly string _defaultApiKey;
+
+    public WeatherInfoApiService(HttpClient httpClient, string defaultApiKey)
     {
-        _httpClient = new HttpClient();
+        _httpClient = httpClient;
+        _defaultApiKey = defaultApiKey;
+    }
+
+    public async Task<string> GetWeather(double lat, double lon)
+    {
+        return await GetWeather(lat, lon, _defaultApiKey);
     }
 
     public async Task<string> GetWeather(double lat, double lon, string apiKey)
     {
-        var json = await _httpClient.GetStringAsync($"{apiURL}?lat={lat}&lon={lon}&appid={apiKey}");
-        return json;
+        try
+        {
+            var json = await _httpClient.GetStringAsync($"{apiURL}?exclude=minutely,hourly,daily,alerts&lat={lat}&lon={lon}&appid={apiKey}");
+            return json;
+        }
+        catch (HttpRequestException)
+        {
+            throw;
+        }
     }
 
 }

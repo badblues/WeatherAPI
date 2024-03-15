@@ -4,7 +4,7 @@ using WebAPI.Models;
 
 namespace WebAPI.Services;
 
-public class WeatherInfoApiService
+public class WeatherApiService
 {
     //Could place in configs, but it's not likely to change
     private readonly string apiURL = "https://api.openweathermap.org/data/3.0/onecall";
@@ -13,7 +13,7 @@ public class WeatherInfoApiService
 
     private readonly string _defaultApiKey;
 
-    public WeatherInfoApiService(HttpClient httpClient, string defaultApiKey)
+    public WeatherApiService(HttpClient httpClient, string defaultApiKey)
     {
         _httpClient = httpClient;
         _defaultApiKey = defaultApiKey;
@@ -31,13 +31,9 @@ public class WeatherInfoApiService
 
         WeatherTimeZoneInfo? weatherInfo = JsonConvert.DeserializeObject<WeatherTimeZoneInfo>(response);
 
-        //Not supposed to happen, but in case it happens
-        if (weatherInfo == null)
-        {
+        if (weatherInfo == null || weatherInfo.Weather == null)
             throw new HttpRequestException("Couldn't get weather info", null, HttpStatusCode.NotFound);
-        }
 
         return weatherInfo;
     }
-
 }

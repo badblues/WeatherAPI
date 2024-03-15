@@ -28,16 +28,10 @@ public class CityLocationApiService
     {
         string response = await _httpClient.GetStringAsync($"{apiURL}?q={city}&appid={apiKey}");
 
-        //Not supposed to happen
-        if (response == null)
-            throw new HttpRequestException("City not found", null, HttpStatusCode.NotFound);
-
         IList<CityLocation>? cities = JsonConvert.DeserializeObject<IList<CityLocation>>(response);
 
         if (cities == null || cities.Count == 0)
-        {
             throw new HttpRequestException("City not found", null, HttpStatusCode.NotFound);
-        }
 
         return cities[0];
     }

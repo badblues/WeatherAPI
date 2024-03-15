@@ -1,6 +1,6 @@
 ﻿namespace WebAPI.DTOs;
 
-public record WeatherDTO
+public record CityWeatherDTO
 {
     public string CityName { get; set; } = "";
 

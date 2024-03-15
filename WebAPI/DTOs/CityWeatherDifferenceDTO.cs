@@ -1,9 +1,9 @@
 ﻿namespace WebAPI.DTOs;
 
-public class WeatherDifferenceDTO
+public class CityWeatherDifferenceDTO
 {
 
-    public WeatherDifferenceDTO(WeatherDTO firstCity, WeatherDTO secondCity)
+    public CityWeatherDifferenceDTO(CityWeatherDTO firstCity, CityWeatherDTO secondCity)
     {
         FirstCity = firstCity;
         SecondCity = secondCity;
@@ -14,9 +14,9 @@ public class WeatherDifferenceDTO
         AverageOvercast = (firstCity.Overcast + secondCity.Overcast) / 2; ;
     }
 
-    public WeatherDTO FirstCity { get; set; }
+    public CityWeatherDTO FirstCity { get; set; }
 
-    public WeatherDTO SecondCity { get; set;}
+    public CityWeatherDTO SecondCity { get; set;}
 
     public double AverageTemperature { get; set; }
 

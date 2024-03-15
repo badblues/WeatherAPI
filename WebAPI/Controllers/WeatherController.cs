@@ -9,26 +9,21 @@ namespace WebAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class WeatherForecastController : ControllerBase
+public class WeatherController : ControllerBase
 {
-
-    private readonly ILogger<WeatherForecastController> _logger;
-
     private readonly WeatherInfoApiService _openWeatherMapApi;
     private readonly CityLocationApiService _cityLocationApiService;
 
-    public WeatherForecastController(
-        ILogger<WeatherForecastController> logger,
+    public WeatherController(
         WeatherInfoApiService openWeatherMapApi,
         CityLocationApiService cityLocationApiService)
     {
-        _logger = logger;
         _openWeatherMapApi = openWeatherMapApi;
         _cityLocationApiService = cityLocationApiService;
     }
 
     [HttpGet("{city}")]
-    public async Task<ActionResult<WeatherDTO>> Get(string city, string? apiKey = null)
+    public async Task<ActionResult<CityWeatherDTO>> Get(string city, string? apiKey = null)
     {
         try
         {
@@ -36,11 +31,11 @@ public class WeatherForecastController : ControllerBase
                 await _cityLocationApiService.GetLocation(city, apiKey) :
                 await _cityLocationApiService.GetLocation(city);
 
-            var weatherJson = apiKey != null ?
+            WeatherTimeZoneInfo weatherInfo = apiKey != null ?
                 await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude, apiKey) :
                 await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude);
 
-            WeatherDTO weatherDTO = ConvertJsonToWeatherDTO(weatherJson, location.City);
+            CityWeatherDTO weatherDTO = ConvertJsonToWeatherDTO(weatherInfo, location.Name);
             return weatherDTO;
         }
         catch (HttpRequestException ex)
@@ -50,7 +45,7 @@ public class WeatherForecastController : ControllerBase
                 case HttpStatusCode.NotFound:
                     return NotFound(ex.Message);
                 case HttpStatusCode.Unauthorized:
-                    return Unauthorized(ex.Message);
+                    return Unauthorized("Unauthorized or invalid apiKey");
                 default:
                     return BadRequest(ex.Message);
             }
@@ -58,7 +53,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet("{firstCity}/{secondCity}")]
-    public async Task<ActionResult<WeatherDifferenceDTO>> Get(string firstCity, string secondCity, string? apiKey = null)
+    public async Task<ActionResult<CityWeatherDifferenceDTO>> Get(string firstCity, string secondCity, string? apiKey = null)
     {
         try
         {
@@ -70,18 +65,18 @@ public class WeatherForecastController : ControllerBase
                 await _cityLocationApiService.GetLocation(secondCity, apiKey) :
                 await _cityLocationApiService.GetLocation(secondCity);
 
-            var firstWeatherJson = apiKey != null ?
+            WeatherTimeZoneInfo firstWeatherInfo = apiKey != null ?
                 await _openWeatherMapApi.GetWeather(firstLocation.Latitude, firstLocation.Longitude, apiKey) :
                 await _openWeatherMapApi.GetWeather(firstLocation.Latitude, firstLocation.Longitude);
 
-            var secondWeatherJson = apiKey != null ?
+            WeatherTimeZoneInfo secondWeatherInfo = apiKey != null ?
                await _openWeatherMapApi.GetWeather(secondLocation.Latitude, secondLocation.Longitude, apiKey) :
                await _openWeatherMapApi.GetWeather(secondLocation.Latitude, secondLocation.Longitude);
 
-            WeatherDTO firstWeatherDTO = ConvertJsonToWeatherDTO(firstWeatherJson, firstLocation.City);
-            WeatherDTO secondWeatherDTO = ConvertJsonToWeatherDTO(secondWeatherJson, secondLocation.City);
+            CityWeatherDTO firstWeatherDTO = ConvertJsonToWeatherDTO(firstWeatherInfo, firstLocation.Name);
+            CityWeatherDTO secondWeatherDTO = ConvertJsonToWeatherDTO(secondWeatherInfo, secondLocation.Name);
 
-            return new WeatherDifferenceDTO(firstWeatherDTO, secondWeatherDTO);
+            return new CityWeatherDifferenceDTO(firstWeatherDTO, secondWeatherDTO);
         }
         catch (HttpRequestException ex)
         {
@@ -90,7 +85,7 @@ public class WeatherForecastController : ControllerBase
                 case HttpStatusCode.NotFound:
                     return NotFound(ex.Message);
                 case HttpStatusCode.Unauthorized:
-                    return Unauthorized(ex.Message);
+                    return Unauthorized("Unauthorized or invalid apiKey");
                 default:
                     return BadRequest(ex.Message);
             }
@@ -99,7 +94,7 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet("{city}/xml")]
     [Produces("application/xml")]
-    public async Task<ActionResult<WeatherDTO>> GetXML(string city, string? apiKey = null)
+    public async Task<ActionResult<CityWeatherDTO>> GetXML(string city, string? apiKey = null)
     {
         try
         {
@@ -107,11 +102,11 @@ public class WeatherForecastController : ControllerBase
                 await _cityLocationApiService.GetLocation(city, apiKey) :
                 await _cityLocationApiService.GetLocation(city);
 
-            var weatherJson = apiKey != null ?
+            WeatherTimeZoneInfo weatherInfo = apiKey != null ?
                 await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude, apiKey) :
                 await _openWeatherMapApi.GetWeather(location.Latitude, location.Longitude);
 
-            WeatherDTO weatherDTO = ConvertJsonToWeatherDTO(weatherJson, location.City);
+            CityWeatherDTO weatherDTO = ConvertJsonToWeatherDTO(weatherInfo, location.Name);
             return weatherDTO;
         }
         catch (HttpRequestException ex)
@@ -121,16 +116,16 @@ public class WeatherForecastController : ControllerBase
                 case HttpStatusCode.NotFound:
                     return NotFound(ex.Message);
                 case HttpStatusCode.Unauthorized:
-                    return Unauthorized(ex.Message);
+                    return Unauthorized("Unauthorized or invalid apiKey");
                 default:
                     return BadRequest(ex.Message);
             }
         }
     }
 
-    private WeatherDTO ConvertJsonToWeatherDTO(string weatherJson, string city)
+    private CityWeatherDTO ConvertJsonToWeatherDTO(WeatherTimeZoneInfo weatherInfo, string city)
     {
-        WeatherDTO weatherDTO = WeatherConverter.JsonToWeatherDTO(weatherJson);
+        CityWeatherDTO weatherDTO = weatherInfo.AsDTO();
         weatherDTO.CityName = city;
         weatherDTO.ServerTime = DateTime.Now;
         weatherDTO.CityTimeDifference = weatherDTO.CityTime - weatherDTO.ServerTime;

@@ -1,7 +1,12 @@
-﻿namespace WebAPI.Services;
+﻿using System.Net;
+using Newtonsoft.Json;
+using WebAPI.Models;
+
+namespace WebAPI.Services;
 
 public class WeatherInfoApiService
 {
+    //Could place in configs, but it's not likely to change
     private readonly string apiURL = "https://api.openweathermap.org/data/3.0/onecall";
 
     private readonly HttpClient _httpClient;
@@ -14,22 +19,25 @@ public class WeatherInfoApiService
         _defaultApiKey = defaultApiKey;
     }
 
-    public async Task<string> GetWeather(double lat, double lon)
+    public async Task<WeatherTimeZoneInfo> GetWeather(double lat, double lon)
     {
         return await GetWeather(lat, lon, _defaultApiKey);
     }
 
-    public async Task<string> GetWeather(double lat, double lon, string apiKey)
+    public async Task<WeatherTimeZoneInfo> GetWeather(double lat, double lon, string apiKey)
     {
-        try
+        string response = await _httpClient.
+            GetStringAsync($"{apiURL}?exclude=minutely,hourly,daily,alerts&lat={lat}&lon={lon}&appid={apiKey}");
+
+        WeatherTimeZoneInfo? weatherInfo = JsonConvert.DeserializeObject<WeatherTimeZoneInfo>(response);
+
+        //Not supposed to happen, but in case it happens
+        if (weatherInfo == null)
         {
-            var json = await _httpClient.GetStringAsync($"{apiURL}?exclude=minutely,hourly,daily,alerts&lat={lat}&lon={lon}&appid={apiKey}");
-            return json;
+            throw new HttpRequestException("Couldn't get weather info", null, HttpStatusCode.NotFound);
         }
-        catch (HttpRequestException)
-        {
-            throw;
-        }
+
+        return weatherInfo;
     }
 
 }

@@ -65,6 +65,23 @@ public class WeatherController : ControllerBase
         }
     }
 
+    [HttpGet("{firstCity}/{secondCity}/xml")]
+    [Produces("application/xml")]
+    public async Task<ActionResult<CityWeatherAverageDTO>> GetXML(string firstCity, string secondCity, string? apiKey)
+    {
+        try
+        {
+            CityWeatherDTO firstWeatherDTO = await GetCityWeatherDTO(firstCity, apiKey);
+            CityWeatherDTO secondWeatherDTO = await GetCityWeatherDTO(secondCity, apiKey);
+
+            return new CityWeatherAverageDTO(firstWeatherDTO, secondWeatherDTO);
+        }
+        catch (HttpRequestException ex)
+        {
+            return GetReturnObject(ex);
+        }
+    }
+
     private async Task<CityWeatherDTO> GetCityWeatherDTO(string city, string? apiKey)
     {
         CityLocation location = apiKey != null ?

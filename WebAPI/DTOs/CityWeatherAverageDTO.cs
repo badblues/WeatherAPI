@@ -3,6 +3,8 @@
 public record CityWeatherAverageDTO
 {
 
+    public CityWeatherAverageDTO() { }
+
     public CityWeatherAverageDTO(CityWeatherDTO firstCity, CityWeatherDTO secondCity)
     {
         FirstCity = firstCity;
@@ -14,9 +16,9 @@ public record CityWeatherAverageDTO
         AverageOvercast = (firstCity.Overcast + secondCity.Overcast) / 2;
     }
 
-    public CityWeatherDTO FirstCity { get; set; }
+    public CityWeatherDTO? FirstCity { get; set; }
 
-    public CityWeatherDTO SecondCity { get; set; }
+    public CityWeatherDTO? SecondCity { get; set; }
 
     public double? AverageTemperature { get; set; }
 

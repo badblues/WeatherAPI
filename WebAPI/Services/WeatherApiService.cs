@@ -19,12 +19,12 @@ public class WeatherApiService
         _defaultApiKey = defaultApiKey;
     }
 
-    public async Task<WeatherTimeZoneInfo> GetWeather(double lat, double lon)
+    public async Task<WeatherTimeZoneInfo> GetWeatherAsync(double lat, double lon)
     {
-        return await GetWeather(lat, lon, _defaultApiKey);
+        return await GetWeatherAsync(lat, lon, _defaultApiKey);
     }
 
-    public async Task<WeatherTimeZoneInfo> GetWeather(double lat, double lon, string apiKey)
+    public async Task<WeatherTimeZoneInfo> GetWeatherAsync(double lat, double lon, string apiKey)
     {
         string response = await _httpClient.
             GetStringAsync($"{apiURL}?exclude=minutely,hourly,daily,alerts&lat={lat}&lon={lon}&appid={apiKey}");

@@ -19,12 +19,12 @@ public class CityLocationApiService
         _defaultApiKey = defaultApiKey;
     }
 
-    public async Task<CityLocation> GetLocation(string city)
+    public async Task<CityLocation> GetLocationAsync(string city)
     {
-        return await GetLocation(city, _defaultApiKey);
+        return await GetLocationAsync(city, _defaultApiKey);
     }
 
-    public async Task<CityLocation> GetLocation(string city, string apiKey)
+    public async Task<CityLocation> GetLocationAsync(string city, string apiKey)
     {
         string response = await _httpClient.GetStringAsync($"{apiURL}?q={city}&appid={apiKey}");
 

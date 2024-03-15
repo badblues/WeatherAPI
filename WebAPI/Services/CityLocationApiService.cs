@@ -19,19 +19,16 @@ public class CityLocationApiService
         _defaultApiKey = defaultApiKey;
     }
 
-    public async Task<CityLocation> GetLocationAsync(string city)
+    public async Task<CityLocation> GetLocationAsync(string city, string? apiKey)
     {
-        return await GetLocationAsync(city, _defaultApiKey);
-    }
+        string appid = apiKey ?? _defaultApiKey;
 
-    public async Task<CityLocation> GetLocationAsync(string city, string apiKey)
-    {
-        string response = await _httpClient.GetStringAsync($"{apiURL}?q={city}&appid={apiKey}");
+        string response = await _httpClient.GetStringAsync($"{apiURL}?q={city}&appid={appid}");
 
         IList<CityLocation>? cities = JsonConvert.DeserializeObject<IList<CityLocation>>(response);
 
         if (cities == null || cities.Count == 0)
-            throw new HttpRequestException("City not found", null, HttpStatusCode.NotFound);
+            throw new HttpRequestException($"Not found city: {city}", null, HttpStatusCode.NotFound);
 
         return cities[0];
     }

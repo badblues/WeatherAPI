@@ -61,20 +61,17 @@ public class WeatherController : ControllerBase
 
     [HttpGet("{firstCity}/{secondCity}/xml")]
     [Produces("application/xml")]
-    public async Task<ActionResult<CityWeatherAverageDTO>> GetXmlAsync (string firstCity, string secondCity, string? apiKey)
+    public async Task<ActionResult<CityWeatherAverageDTO>> GetXmlAsync(string firstCity, string secondCity, string? apiKey)
     {
         return await GetAsync(firstCity, secondCity, apiKey);
     }
 
     private async Task<CityWeatherDTO> GetCityWeatherDTO(string city, string? apiKey)
     {
-        CityLocation location = apiKey != null ?
-                await _cityLocationApiService.GetLocationAsync(city, apiKey) :
-                await _cityLocationApiService.GetLocationAsync(city);
+        CityLocation location = await _cityLocationApiService.GetLocationAsync(city, apiKey);
 
-        WeatherTimeZoneInfo weatherTimeZoneInfo = apiKey != null ?
-            await _openWeatherMapApi.GetWeatherAsync(location.Latitude, location.Longitude, apiKey) :
-            await _openWeatherMapApi.GetWeatherAsync(location.Latitude, location.Longitude);
+        WeatherTimeZoneInfo weatherTimeZoneInfo =
+            await _openWeatherMapApi.GetWeatherAsync(location.Latitude, location.Longitude, apiKey);
 
         return AssembleCityWeatherDTO(weatherTimeZoneInfo, location.Name);
     }
@@ -87,7 +84,7 @@ public class WeatherController : ControllerBase
             HttpStatusCode.NotFound => NotFound(ex.Message),
             HttpStatusCode.Unauthorized => Unauthorized("Unauthorized or invalid apiKey"),
             //Don't know what else to return if something unexpected happens
-            _ => StatusCode((int)HttpStatusCode.InternalServerError,"Unexpected error occured"),
+            _ => StatusCode((int)HttpStatusCode.InternalServerError, "Unexpected error occured"),
         };
     }
 

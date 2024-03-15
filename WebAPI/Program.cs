@@ -1,17 +1,18 @@
-using Serilog;
 using System.Configuration;
+using Serilog;
 using WebAPI.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog();
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: false);
 
 string? defaultApiKey = builder.Configuration.GetSection("DefaultApiKey").Value;
 
 if (defaultApiKey == null)
-    throw new ConfigurationErrorsException("DefaultApiKey isn't configured");
+{
+    throw new ConfigurationErrorsException("Default ApiKey isn't configured");
+}
 
 builder.Services.AddControllers()
     .AddXmlSerializerFormatters();
@@ -36,6 +37,8 @@ builder.Services.AddTransient(s =>
         }
     );
 
+builder.Host.UseSerilog();
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -46,8 +49,8 @@ app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    _ = app.UseSwagger();
+    _ = app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

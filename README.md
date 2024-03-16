@@ -2,8 +2,8 @@
 Make sure to configure DefaultApiKey in appsettings.json
 
 ###### Unix:
-From solution root directory:
-`docker build -t webapi -f WebAPI/Dockerfile .`
+From solution root directory:  
+`docker build -t webapi -f WebAPI/Dockerfile .`  
 `docker run -p 8080:80  -v "$(pwd)/WebAPI/logs:/app/logs" webapi`
 
 #### Endpoints
@@ -30,7 +30,7 @@ From solution root directory:
   - Example:
     - /weather/London/xml?apiKey=your_api_key
     - /weather/London/xml
-- GET /weather/{firstCity}/{secondCity}/xml?apiKey={apiKey}: Averageweather between two cities in XML format
+- GET /weather/{firstCity}/{secondCity}/xml?apiKey={apiKey}: Average weather between two cities in XML format
   - Parameters:
     - firstCity: Name of the first city.
     - secondCity: Name of the second city.

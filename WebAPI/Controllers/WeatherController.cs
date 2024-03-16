@@ -1,6 +1,4 @@
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 using WebAPI.DTOs;
 using WebAPI.Services;
 

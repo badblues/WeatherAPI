@@ -1,9 +1,6 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using Serilog;
 using System.Net;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace WebAPI.Middleware;
 
@@ -26,9 +23,9 @@ public class ErrorHandlingMiddleware
         {
             ObjectResult response = HandleException(ex);
 
-            context.Response.StatusCode = response.StatusCode.Value;
+            context.Response.StatusCode = response.StatusCode!.Value;
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(response.Value.ToString());
+            await context.Response.WriteAsync(response.Value!.ToString()!);
         }
     }
 

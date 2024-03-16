@@ -1,10 +1,9 @@
 using System.Configuration;
 using Serilog;
-using WebAPI.Services;
 using WebAPI.Middleware;
+using WebAPI.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: false);
 
@@ -44,7 +43,7 @@ builder.Services.AddTransient(s =>
             return new WeatherApiService(client!, weatherApiUrl, defaultApiKey);
         }
     );
-    
+
 builder.Services.AddTransient<WeatherDataService>();
 
 builder.Host.UseSerilog();

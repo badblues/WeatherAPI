@@ -1,6 +1,6 @@
 using WebAPI.DTOs;
-using WebAPI.Models;
 using WebAPI.Extensions;
+using WebAPI.Models;
 
 namespace WebAPI.Services;
 

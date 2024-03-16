@@ -1,6 +1,7 @@
 using System.Configuration;
 using Serilog;
 using WebAPI.Services;
+using WebAPI.Middleware;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,8 @@ if (app.Environment.IsDevelopment())
     _ = app.UseSwagger();
     _ = app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

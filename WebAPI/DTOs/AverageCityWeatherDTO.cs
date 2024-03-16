@@ -1,11 +1,11 @@
 ﻿namespace WebAPI.DTOs;
 
-public record CityWeatherAverageDTO
+public record AverageCityWeatherDTO
 {
 
-    public CityWeatherAverageDTO() { }
+    public AverageCityWeatherDTO() { }
 
-    public CityWeatherAverageDTO(CityWeatherDTO firstCity, CityWeatherDTO secondCity)
+    public AverageCityWeatherDTO(CityWeatherDTO firstCity, CityWeatherDTO secondCity)
     {
         FirstCity = firstCity;
         SecondCity = secondCity;

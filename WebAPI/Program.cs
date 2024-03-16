@@ -36,6 +36,8 @@ builder.Services.AddTransient(s =>
             return new WeatherApiService(client!, defaultApiKey);
         }
     );
+    
+builder.Services.AddTransient<WeatherDataService>();
 
 builder.Host.UseSerilog();
 

@@ -2,25 +2,19 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using WebAPI.DTOs;
-using WebAPI.Extensions;
-using WebAPI.Models;
 using WebAPI.Services;
 
 namespace WebAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("/weather")]
 public class WeatherController : ControllerBase
 {
-    private readonly WeatherApiService _openWeatherMapApi;
-    private readonly CityLocationApiService _cityLocationApiService;
+    private readonly WeatherDataService _weatherDataService;
 
-    public WeatherController(
-        WeatherApiService openWeatherMapApi,
-        CityLocationApiService cityLocationApiService)
+    public WeatherController(WeatherDataService weatherDataService)
     {
-        _openWeatherMapApi = openWeatherMapApi;
-        _cityLocationApiService = cityLocationApiService;
+        _weatherDataService = weatherDataService;
     }
 
     [HttpGet("{city}")]
@@ -28,7 +22,7 @@ public class WeatherController : ControllerBase
     {
         try
         {
-            return await GetCityWeatherDTO(city, apiKey);
+            return await _weatherDataService.GetCityWeatherDTO(city, apiKey);
         }
         catch (HttpRequestException ex)
         {
@@ -37,14 +31,11 @@ public class WeatherController : ControllerBase
     }
 
     [HttpGet("{firstCity}/{secondCity}")]
-    public async Task<ActionResult<CityWeatherAverageDTO>> GetAsync(string firstCity, string secondCity, string? apiKey)
+    public async Task<ActionResult<AverageCityWeatherDTO>> GetAsync(string firstCity, string secondCity, string? apiKey)
     {
         try
         {
-            CityWeatherDTO firstWeatherDTO = await GetCityWeatherDTO(firstCity, apiKey);
-            CityWeatherDTO secondWeatherDTO = await GetCityWeatherDTO(secondCity, apiKey);
-
-            return new CityWeatherAverageDTO(firstWeatherDTO, secondWeatherDTO);
+           return await _weatherDataService.GetCityWeatherAverageDTO(firstCity, secondCity, apiKey);
         }
         catch (HttpRequestException ex)
         {
@@ -61,19 +52,9 @@ public class WeatherController : ControllerBase
 
     [HttpGet("{firstCity}/{secondCity}/xml")]
     [Produces("application/xml")]
-    public async Task<ActionResult<CityWeatherAverageDTO>> GetXmlAsync(string firstCity, string secondCity, string? apiKey)
+    public async Task<ActionResult<AverageCityWeatherDTO>> GetXmlAsync(string firstCity, string secondCity, string? apiKey)
     {
         return await GetAsync(firstCity, secondCity, apiKey);
-    }
-
-    private async Task<CityWeatherDTO> GetCityWeatherDTO(string city, string? apiKey)
-    {
-        CityLocation location = await _cityLocationApiService.GetLocationAsync(city, apiKey);
-
-        WeatherTimeZoneInfo weatherTimeZoneInfo =
-            await _openWeatherMapApi.GetWeatherAsync(location.Latitude, location.Longitude, apiKey);
-
-        return AssembleCityWeatherDTO(weatherTimeZoneInfo, location.Name);
     }
 
     private ObjectResult HandleHttpRequestException(HttpRequestException ex)
@@ -88,13 +69,6 @@ public class WeatherController : ControllerBase
         };
     }
 
-    private CityWeatherDTO AssembleCityWeatherDTO(WeatherTimeZoneInfo weatherInfo, string city)
-    {
-        CityWeatherDTO weatherDTO = weatherInfo.AsDTO();
-        weatherDTO.CityName = city;
-        weatherDTO.ServerTime = DateTime.Now;
-        weatherDTO.CityTimeDifference = weatherDTO.CityTime - weatherDTO.ServerTime;
-        return weatherDTO;
-    }
+
 }
 

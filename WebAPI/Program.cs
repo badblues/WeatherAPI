@@ -9,6 +9,13 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false);
 
 string? defaultApiKey = builder.Configuration.GetSection("DefaultApiKey").Value;
+string? cityLocationApiUrl = builder.Configuration.GetSection("CityLocationApiUrl").Value;
+string? weatherApiUrl = builder.Configuration.GetSection("WeatherApiUrl").Value;
+
+if (cityLocationApiUrl == null || weatherApiUrl == null)
+{
+    throw new ConfigurationErrorsException("API URLs aren't configured");
+}
 
 if (defaultApiKey == null)
 {
@@ -27,14 +34,14 @@ builder.Services.AddHttpClient();
 builder.Services.AddTransient(s =>
         {
             HttpClient? client = s.GetService<HttpClient>();
-            return new CityLocationApiService(client!, defaultApiKey);
+            return new CityLocationApiService(client!, cityLocationApiUrl, defaultApiKey);
         }
     );
 
 builder.Services.AddTransient(s =>
         {
             HttpClient? client = s.GetService<HttpClient>();
-            return new WeatherApiService(client!, defaultApiKey);
+            return new WeatherApiService(client!, weatherApiUrl, defaultApiKey);
         }
     );
     

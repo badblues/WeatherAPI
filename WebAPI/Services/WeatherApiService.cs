@@ -6,16 +6,16 @@ namespace WebAPI.Services;
 
 public class WeatherApiService
 {
-    //Could place in configs, but it's not likely to change
-    private readonly string apiURL = "https://api.openweathermap.org/data/3.0/onecall";
+    private readonly string _apiUrl;
 
     private readonly HttpClient _httpClient;
 
     private readonly string _defaultApiKey;
 
-    public WeatherApiService(HttpClient httpClient, string defaultApiKey)
+    public WeatherApiService(HttpClient httpClient, string apiUrl, string defaultApiKey)
     {
         _httpClient = httpClient;
+        _apiUrl = apiUrl;
         _defaultApiKey = defaultApiKey;
     }
 
@@ -24,7 +24,7 @@ public class WeatherApiService
         string appid = apiKey ?? _defaultApiKey;
 
         string response = await _httpClient.
-            GetStringAsync($"{apiURL}?exclude=minutely,hourly,daily,alerts&lat={lat}&lon={lon}&appid={appid}");
+            GetStringAsync($"{_apiUrl}?exclude=minutely,hourly,daily,alerts&lat={lat}&lon={lon}&appid={appid}");
 
         WeatherTimeZoneInfo? weatherInfo = JsonConvert.DeserializeObject<WeatherTimeZoneInfo>(response);
 

@@ -6,16 +6,16 @@ namespace WebAPI.Services;
 
 public class CityLocationApiService
 {
-    //Could place in configs, but it's not likely to change
-    private readonly string apiURL = "https://api.openweathermap.org/geo/1.0/direct";
+    private readonly string _apiUrl;
 
     private readonly HttpClient _httpClient;
 
     private readonly string _defaultApiKey;
 
-    public CityLocationApiService(HttpClient httpClient, string defaultApiKey)
+    public CityLocationApiService(HttpClient httpClient, string apiUrl, string defaultApiKey)
     {
         _httpClient = httpClient;
+        _apiUrl = apiUrl;
         _defaultApiKey = defaultApiKey;
     }
 
@@ -23,7 +23,7 @@ public class CityLocationApiService
     {
         string appid = apiKey ?? _defaultApiKey;
 
-        string response = await _httpClient.GetStringAsync($"{apiURL}?q={city}&appid={appid}");
+        string response = await _httpClient.GetStringAsync($"{_apiUrl}?q={city}&appid={appid}");
 
         IList<CityLocation>? cities = JsonConvert.DeserializeObject<IList<CityLocation>>(response);
 

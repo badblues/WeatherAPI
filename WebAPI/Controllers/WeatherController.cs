@@ -26,7 +26,7 @@ public class WeatherController : ControllerBase
     [HttpGet("{firstCity}/{secondCity}")]
     public async Task<ActionResult<AverageCityWeatherDTO>> GetAsync(string firstCity, string secondCity, string? apiKey)
     {
-        return await _weatherDataService.GetCityWeatherAverageDTO(firstCity, secondCity, apiKey);
+        return await _weatherDataService.GetAverageCityWeatherDTO(firstCity, secondCity, apiKey);
     }
 
     [HttpGet("{city}/xml")]

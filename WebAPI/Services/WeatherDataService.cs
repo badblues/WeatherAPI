@@ -17,7 +17,7 @@ public class WeatherDataService
         _cityLocationApiService = cityLocationApiService;
     }
 
-    public async Task<AverageCityWeatherDTO> GetCityWeatherAverageDTO(string firstCity, string secondCity, string? apiKey)
+    public async Task<AverageCityWeatherDTO> GetAverageCityWeatherDTO(string firstCity, string secondCity, string? apiKey)
     {
         CityWeatherDTO firstWeatherDTO = await GetCityWeatherDTO(firstCity, apiKey);
         CityWeatherDTO secondWeatherDTO = await GetCityWeatherDTO(secondCity, apiKey);

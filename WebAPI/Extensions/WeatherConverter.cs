@@ -10,13 +10,8 @@ public static class WeatherConverter
     {
         DateTime? cityTime = null;
         double? temperature = null;
-        double? pressure = null;
-        double? humidity = null;
-        double? windSpeed = null;
-        double? overcast = null;
 
-        if (weatherInfo.Weather != null)
-        {
+        if (weatherInfo.Weather != null) {
             if (weatherInfo.Weather.TimeSeconds.HasValue)
             {
                 long timeSeconds = weatherInfo.Weather.TimeSeconds.Value;
@@ -26,24 +21,17 @@ public static class WeatherConverter
             }
 
             if (weatherInfo.Weather.Temperature.HasValue)
-            {
                 temperature = KelvinToCelsius(weatherInfo.Weather.Temperature.Value);
-            }
-
-            pressure = weatherInfo.Weather.Pressure;
-            humidity = weatherInfo.Weather.Humidity;
-            windSpeed = weatherInfo.Weather.WindSpeed;
-            overcast = weatherInfo.Weather.Overcast;
         }
 
         return new CityWeatherDTO
         {
             CityTime = cityTime,
             Temperature = temperature,
-            Pressure = pressure,
-            Humidity = humidity,
-            WindSpeed = windSpeed,
-            Overcast = overcast
+            Pressure = weatherInfo.Weather?.Pressure,
+            Humidity = weatherInfo.Weather?.Humidity,
+            WindSpeed = weatherInfo.Weather?.WindSpeed,
+            Overcast = weatherInfo.Weather?.Overcast
         };
     }
 
